@@ -184,6 +184,7 @@ jobs:
             --namespace "$K8S_NAMESPACE" \
             --create-namespace \
             --set dbPassword="${{ secrets.DB_PASSWORD }}" \
+            --set persistence.storageClass=gp2 \
             --wait --timeout 5m
 
       - name: Deploy backend
