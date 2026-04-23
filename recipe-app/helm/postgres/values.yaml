@@ -1,0 +1,25 @@
+image:
+  repository: postgres
+  tag: "15-alpine"
+  pullPolicy: IfNotPresent
+
+database:
+  name: recipes
+  user: postgres
+  # password is injected via K8s Secret — never set here
+
+service:
+  type: ClusterIP
+  port: 5432
+
+persistence:
+  storageClass: ""      # leave empty to use cluster default StorageClass
+  size: 10Gi
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi

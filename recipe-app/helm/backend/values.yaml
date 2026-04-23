@@ -1,0 +1,65 @@
+replicaCount: 2
+
+image:
+  repository: ""        # Set to ECR URL in CI
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
+  host: "api.ammas-kitchen.example.com"
+  tls: []
+
+# Non-sensitive config — stored in ConfigMap
+config:
+  AWS_REGION: "us-east-1"
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_NAME: "recipes"
+  CORS_ORIGINS: "https://ammas-kitchen.example.com"
+
+# Sensitive config — values are read from K8s Secrets (never hardcoded here)
+# Populate the Secret before deploying, or use --set secrets.* in CI.
+secrets:
+  # Name of the AWS Secrets Manager secret holding DB credentials
+  dbSecretName: "ammas-kitchen/db-credentials"
+  # S3 bucket name (treated as sensitive to avoid exposing infra details)
+  s3BucketName: ""
+
+# Service account for IRSA (IAM Roles for Service Accounts)
+serviceAccount:
+  create: true
+  name: "backend"
+  annotations: {}
+  # In production, Terraform sets the IRSA annotation:
+  # eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/ammas-kitchen-backend
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 15
+  periodSeconds: 20
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 10
+  periodSeconds: 10

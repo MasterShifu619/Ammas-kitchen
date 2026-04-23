@@ -1,0 +1,2 @@
+# PVC is managed automatically by the StatefulSet's volumeClaimTemplates.
+# This file is intentionally empty — do not add a standalone PVC here.

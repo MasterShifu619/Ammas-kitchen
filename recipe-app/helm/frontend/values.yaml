@@ -1,0 +1,45 @@
+replicaCount: 2
+
+image:
+  repository: ""        # Set to ECR URL in CI: <account>.dkr.ecr.us-east-1.amazonaws.com/ammas-kitchen/frontend
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  host: "ammas-kitchen.example.com"
+  tls: []
+  # tls:
+  #   - secretName: ammas-kitchen-tls
+  #     hosts:
+  #       - ammas-kitchen.example.com
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: 80
+  initialDelaySeconds: 10
+  periodSeconds: 15
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: 80
+  initialDelaySeconds: 5
+  periodSeconds: 10

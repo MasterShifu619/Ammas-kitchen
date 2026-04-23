@@ -1,0 +1,6 @@
+apiVersion: v2
+name: postgres
+description: Amma's Kitchen — PostgreSQL StatefulSet
+type: application
+version: 0.1.0
+appVersion: "15"
