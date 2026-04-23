@@ -43,7 +43,7 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt pytest httpx
-        working-directory: backend
+        working-directory: recipe-app/backend
 
       - name: Run tests
         env:
@@ -55,7 +55,7 @@ jobs:
           S3_BUCKET_NAME: ""
           AWS_REGION: us-east-1
         run: pytest -v || true   # non-blocking until test suite is written
-        working-directory: backend
+        working-directory: recipe-app/backend
 
   # ── Frontend: test ────────────────────────────────────────────────────────────
   test-frontend:
@@ -68,15 +68,15 @@ jobs:
         with:
           node-version: "18"
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: recipe-app/frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: frontend
+        working-directory: recipe-app/frontend
 
       - name: Run tests
         run: npm test -- --watchAll=false --passWithNoTests
-        working-directory: frontend
+        working-directory: recipe-app/frontend
 
   # ── Backend: build & push ─────────────────────────────────────────────────────
   build-backend:
@@ -106,7 +106,7 @@ jobs:
           ECR_REPO: ${{ secrets.BACKEND_ECR_REPO }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t "$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG" ./backend
+          docker build -t "$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG" ./recipe-app/backend
           docker tag "$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG" "$ECR_REGISTRY/$ECR_REPO:latest"
           docker push "$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG"
           docker push "$ECR_REGISTRY/$ECR_REPO:latest"
@@ -143,7 +143,7 @@ jobs:
           docker build \
             --build-arg REACT_APP_API_URL="$REACT_APP_API_URL" \
             -t "$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG" \
-            ./frontend
+            ./recipe-app/frontend
           docker tag "$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG" "$ECR_REGISTRY/$ECR_REPO:latest"
           docker push "$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG"
           docker push "$ECR_REGISTRY/$ECR_REPO:latest"
@@ -180,7 +180,7 @@ jobs:
 
       - name: Deploy postgres
         run: |
-          helm upgrade --install postgres ./helm/postgres \
+          helm upgrade --install postgres ./recipe-app/helm/postgres \
             --namespace "$K8S_NAMESPACE" \
             --create-namespace \
             --set dbPassword="${{ secrets.DB_PASSWORD }}" \
@@ -191,7 +191,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          helm upgrade --install backend ./helm/backend \
+          helm upgrade --install backend ./recipe-app/helm/backend \
             --namespace "$K8S_NAMESPACE" \
             --set image.repository="$ECR_REGISTRY/${{ secrets.BACKEND_ECR_REPO }}" \
             --set image.tag="$IMAGE_TAG" \
@@ -205,7 +205,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          helm upgrade --install frontend ./helm/frontend \
+          helm upgrade --install frontend ./recipe-app/helm/frontend \
             --namespace "$K8S_NAMESPACE" \
             --set image.repository="$ECR_REGISTRY/${{ secrets.FRONTEND_ECR_REPO }}" \
             --set image.tag="$IMAGE_TAG" \
