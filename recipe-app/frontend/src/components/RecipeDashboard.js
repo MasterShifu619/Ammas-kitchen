@@ -109,7 +109,7 @@ export default function RecipeDashboard() {
     return (
       <div style={{ textAlign: 'center', marginTop: '4rem', color: '#888' }}>
         <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🍳</div>
-        <p style={{ fontSize: '1.15rem' }}>No recipes yett. Be the first to share one!</p>
+        <p style={{ fontSize: '1.15rem' }}>No recipes yettt. Be the first to share one!</p>
       </div>
     );
   }
