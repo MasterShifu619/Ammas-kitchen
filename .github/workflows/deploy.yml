@@ -199,6 +199,9 @@ jobs:
             --set secrets.dbSecretName="${{ secrets.DB_SECRET_NAME }}" \
             --set secrets.s3BucketName="${{ secrets.S3_BUCKET_NAME }}" \
             --set "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn=${{ secrets.BACKEND_IRSA_ROLE_ARN }}" \
+            --set ingress.host="${{ secrets.FRONTEND_HOST }}" \
+            --set-string 'ingress.annotations.nginx\.ingress\.kubernetes\.io/rewrite-target=/$2' \
+            --set-string 'ingress.annotations.nginx\.ingress\.kubernetes\.io/use-regex=true' \
             --wait --timeout 5m
 
       - name: Deploy frontend
